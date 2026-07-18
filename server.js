@@ -50,7 +50,7 @@ if (process.env.NODE_ENV === 'production') {
 // Enable CORS with dynamic origin authorization for production safety
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
-  'https://your-app.vercel.app',
+  'https://startup-crm-lite-harshith94.vercel.app',
 ];
 
 app.use(
