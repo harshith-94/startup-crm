@@ -4,7 +4,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
 import mongoose from 'mongoose';
 
 import connectDB from './config/database.js';
@@ -48,8 +47,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Enable CORS with dynamic origin authorization for production safety
+const frontendUrls = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  : ['http://localhost:5173'];
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
+  ...frontendUrls,
   'https://startup-crm-lite-harshith94.vercel.app',
 ];
 
@@ -93,9 +96,6 @@ app.use(express.json({ limit: '10kb' }));
 
 // URL-encoded data parser
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-
-// MongoDB injection protection middleware to sanitize input keys
-app.use(mongoSanitize());
 
 // API health check endpoint
 app.get('/api/health', (req, res) => {
