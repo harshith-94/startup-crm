@@ -36,6 +36,9 @@ const checkRequiredEnvVars = () => {
 
 const app = express();
 
+// Trust proxy settings if behind a reverse proxy (e.g. Vercel, Render, Heroku)
+app.set('trust proxy', 1);
+
 // Set security HTTP headers
 app.use(helmet());
 
