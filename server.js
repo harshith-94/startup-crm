@@ -53,7 +53,8 @@ const frontendUrls = process.env.FRONTEND_URL
 
 const allowedOrigins = [
   ...frontendUrls,
-  'https://startup-crm-lite-amber-gamma.vercel.app/login',
+  'https://startup-crm-lite-amber-gamma.vercel.app',
+  'https://startup-crm-lite-harshith94.vercel.app',
 ];
 
 app.use(
