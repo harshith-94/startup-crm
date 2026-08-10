@@ -48,7 +48,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // Enable CORS with dynamic origin authorization for production safety
 const frontendUrls = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim()).filter(Boolean)
   : ['http://localhost:5173'];
 
 const allowedOrigins = [
@@ -60,11 +60,32 @@ app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      if (!origin) {
+        return callback(null, true);
       }
+
+      // Clean trailing slash from origin for consistent validation
+      const cleanOrigin = origin.replace(/\/$/, '');
+
+      // 1. Check exact match in configured allowed origins
+      const isAllowedExact = allowedOrigins.some(
+        (allowed) => allowed && allowed.replace(/\/$/, '') === cleanOrigin
+      );
+
+      if (isAllowedExact) {
+        return callback(null, true);
+      }
+
+      // 2. Dynamically allow all Vercel deployments/previews for this app
+      // Matches: https://startup-crm-lite.vercel.app
+      // and https://startup-crm-lite-<branch/deployment>.vercel.app
+      const vercelPattern = /^https:\/\/startup-crm-lite(-[a-z0-9-]+)?\.vercel\.app$/i;
+      if (vercelPattern.test(cleanOrigin)) {
+        return callback(null, true);
+      }
+
+      // If origin is not recognized, reject the request (without throwing a 500 error)
+      callback(null, false);
     },
     credentials: true,
   })
